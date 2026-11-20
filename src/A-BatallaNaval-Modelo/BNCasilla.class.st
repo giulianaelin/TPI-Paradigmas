@@ -1,6 +1,3 @@
-"
-Una casilla individual. Conoce su coordenada, su terreno (agua o isla), el estado de su mina (sinMina, armada, detonada), si fue atacada y su ocupante. Las islas no admiten minas ni ocupantes. Las reglas de juego las aplica BNTablero.
-"
 Class {
 	#name : 'BNCasilla',
 	#superclass : 'Object',

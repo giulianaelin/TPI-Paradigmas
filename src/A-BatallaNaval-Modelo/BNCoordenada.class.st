@@ -1,6 +1,3 @@
-"
-Posicion inmutable de un tablero de 12x12: fila 1..12 y columna A..L. Valida limites, se compara por valor, convierte desde texto y entrega sus vecinos.
-"
 Class {
 	#name : 'BNCoordenada',
 	#superclass : 'Object',

@@ -1,6 +1,3 @@
-"
-Superclase de los errores del juego Batalla Naval.
-"
 Class {
 	#name : 'BNError',
 	#superclass : 'Error',

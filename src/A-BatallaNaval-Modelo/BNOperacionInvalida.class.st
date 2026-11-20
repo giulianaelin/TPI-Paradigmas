@@ -1,6 +1,3 @@
-"
-Se lanza cuando una operacion viola las reglas del tablero.
-"
 Class {
 	#name : 'BNOperacionInvalida',
 	#superclass : 'BNError',
