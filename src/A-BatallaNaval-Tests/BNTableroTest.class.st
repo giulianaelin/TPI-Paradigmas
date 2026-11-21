@@ -106,6 +106,15 @@ BNTableroTest >> testNoSePuedenSuperponerDosNaves [
 ]
 
 { #category : 'tests' }
+BNTableroTest >> testPuedeAgregarIslaEn [
+    "F6-G6 esta lejos de B2; C3 la toca en diagonal; una isla vacia no vale."
+    tablero agregarIslaEn: { self c: 'B2' }.
+    self assert: (tablero puedeAgregarIslaEn: { self c: 'F6'. self c: 'G6' }).
+    self deny: (tablero puedeAgregarIslaEn: { self c: 'C3' }).
+    self deny: (tablero puedeAgregarIslaEn: {})
+]
+
+{ #category : 'tests' }
 BNTableroTest >> testRetirarLiberaLasCasillasDeLaNave [
     "Al retirar la nave, sus casillas quedan desocupadas."
     | nave |

@@ -70,6 +70,12 @@ BNCoordenada class >> fila: unaFila columna: unaColumna [
     ^self new setFila: unaFila columna: unaColumna
 ]
 
+{ #category : 'accessing' }
+BNCoordenada class >> horizontal [
+    "Desplazamiento para avanzar una columna hacia la derecha: {filas. columnas}."
+    ^#(0 1)
+]
+
 { #category : 'as yet unclassified' }
 BNCoordenada class >> letraDeColumna: unNumeroDeColumna [
     "Convierte un numero de columna en su letra"
@@ -99,6 +105,12 @@ BNCoordenada class >> todas [
     ^coordenadas
 ]
 
+{ #category : 'public' }
+BNCoordenada class >> vertical [
+    "Desplazamiento para avanzar una fila hacia abajo: {filas. columnas}."
+    ^#(1 0)
+]
+
 { #category : 'comparing' }
 BNCoordenada >> = otraCoordenada [
     "Comprueba si dos coordenadas tienen la misma fila y columna."
@@ -111,6 +123,14 @@ BNCoordenada >> = otraCoordenada [
 BNCoordenada >> asArray [
     "Devuelve la coordenada como una lista de dos numeros."
     ^{fila. columna}
+]
+
+{ #category : 'as yet unclassified' }
+BNCoordenada >> cabeLineaDe: unaCantidad hacia: unaDireccion [
+    "Verdadero si una linea de esa cantidad de casillas, empezando aca y avanzando en esa direccion, queda dentro del tablero. Alcanza con mirar la ultima casilla."
+    ^self class
+        esValidaFila: fila + ((unaCantidad - 1) * unaDireccion first)
+        columna: columna + ((unaCantidad - 1) * unaDireccion last)
 ]
 
 { #category : 'accessing' }
@@ -141,6 +161,15 @@ BNCoordenada >> hash [
 BNCoordenada >> letraDeColumna [
     "Devuelve la letra correspondiente a esta columna."
     ^self class letraDeColumna: columna
+]
+
+{ #category : 'as yet unclassified' }
+BNCoordenada >> lineaDe: unaCantidad hacia: unaDireccion [
+    "Devuelve esa cantidad de coordenadas seguidas, empezando por esta. Ejemplo: B2 lineaDe: 3 hacia: horizontal da B2, C2, D2. Si se sale del tablero, da error."
+    ^(0 to: unaCantidad - 1) collect: [:paso |
+        self class
+            fila: fila + (paso * unaDireccion first)
+            columna: columna + (paso * unaDireccion last)]
 ]
 
 { #category : 'printing' }

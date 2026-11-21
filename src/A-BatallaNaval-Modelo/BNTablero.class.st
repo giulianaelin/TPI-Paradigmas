@@ -15,13 +15,8 @@ Class {
 { #category : 'as yet unclassified' }
 BNTablero >> agregarIslaEn: unasCoordenadas [
     "Convierte en isla esas casillas. Valida todo antes de modificar, para que una isla invalida no deje el tablero a medias."
-    unasCoordenadas isEmpty ifTrue: [
-        ^BNOperacionInvalida signal: 'Una isla necesita al menos una casilla'].
-    ((self casillasEn: unasCoordenadas) allSatisfy: [:unaCasilla | unaCasilla estaLibre])
-        ifFalse: [
-            ^BNOperacionInvalida signal: 'Una isla solo puede ubicarse en casillas libres'].
-    (self tocaOtraIsla: unasCoordenadas) ifTrue: [
-        ^BNOperacionInvalida signal: 'Una isla no puede tocar a otra isla'].
+    (self puedeAgregarIslaEn: unasCoordenadas) ifFalse: [
+        ^BNOperacionInvalida signal: 'Una isla necesita casillas libres que no toquen otra isla'].
     (self casillasEn: unasCoordenadas) do: [:unaCasilla | unaCasilla convertirEnIsla].
     islas add: unasCoordenadas asArray
 ]
@@ -88,6 +83,14 @@ BNTablero >> initialize [
 BNTablero >> islas [
     "Devuelve las islas; cada una es la lista de coordenadas que ocupa."
     ^islas copy
+]
+
+{ #category : 'as yet unclassified' }
+BNTablero >> puedeAgregarIslaEn: unasCoordenadas [
+    "Verdadero si esas casillas pueden ser una isla: al menos una, todas libres y sin tocar otra isla."
+    ^unasCoordenadas notEmpty and: [
+        ((self casillasEn: unasCoordenadas) allSatisfy: [:unaCasilla | unaCasilla estaLibre])
+            and: [(self tocaOtraIsla: unasCoordenadas) not]]
 ]
 
 { #category : 'as yet unclassified' }
