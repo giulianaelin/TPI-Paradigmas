@@ -11,6 +11,12 @@ Class {
 	#package : 'A-BatallaNaval-Modelo'
 }
 
+{ #category : 'datos del tipo' }
+BNNave >> arma [
+    "El arma con la que dispara. La define cada tipo de nave."
+    ^self subclassResponsibility
+]
+
 { #category : 'as yet unclassified' }
 BNNave >> estaAFlote [
     "Verdadero si todavia no se hundio."

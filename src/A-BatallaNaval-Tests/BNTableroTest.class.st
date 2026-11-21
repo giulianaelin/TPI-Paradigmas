@@ -59,6 +59,16 @@ BNTableroTest >> testCoordenadasConMina [
 ]
 
 { #category : 'tests' }
+BNTableroTest >> testDispararALosRestosDeUnaNaveHundida [
+    "Una nave que se hundio por minas puede tener casillas sin atacar: disparar ahi da #restos y no la daña de nuevo."
+    | nave |
+    nave := BNDestructor new.
+    tablero ubicar: nave en: { self c: 'A1'. self c: 'B1' }.
+    nave recibirImpacto; recibirImpacto.
+    self assert: (tablero recibirDisparoEn: (self c: 'A1')) equals: #restos
+]
+
+{ #category : 'tests' }
 BNTableroTest >> testDispararAUnaIsla [
     "La isla bloquea el disparo."
     tablero agregarIslaEn: { self c: 'D4' }.
@@ -113,6 +123,31 @@ BNTableroTest >> testLasIslasNoPuedenTocarseNiEnDiagonal [
 ]
 
 { #category : 'tests' }
+BNTableroTest >> testMoverUnaNave [
+    "Un destructor en A1-B1 se mueve hacia abajo: queda en A2-B2."
+    | nave |
+    nave := BNDestructor new.
+    tablero ubicar: nave desde: (self c: 'A1') hacia: BNCoordenada horizontal.
+    tablero mover: nave hacia: BNCoordenada abajo.
+    self
+        assert: ((tablero casillasDe: nave) collect: [:unaCasilla | unaCasilla coordenada])
+        equals: { self c: 'A2'. self c: 'B2' }.
+    self deny: (tablero casillaEn: (self c: 'A1')) estaOcupada
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testMoverseSobreUnaMinaHiere [
+    "Si al moverse cae sobre una mina, la mina explota y la nave pierde 1 vida."
+    | nave |
+    nave := BNDestructor new.
+    tablero ubicar: nave desde: (self c: 'A1') hacia: BNCoordenada horizontal.
+    tablero armarMinaEn: (self c: 'C1').
+    tablero mover: nave hacia: BNCoordenada derecha.
+    self assert: nave resistenciaRestante equals: 1.
+    self assert: (tablero casillaEn: (self c: 'C1')) minaDetonada
+]
+
+{ #category : 'tests' }
 BNTableroTest >> testNoSePuedeArmarUnaMinaEnUnaIsla [
     "Una isla no admite minas."
     tablero agregarIslaEn: { self c: 'D4' }.
@@ -124,6 +159,16 @@ BNTableroTest >> testNoSePuedeDispararDosVecesEnLaMismaCasilla [
     "Una casilla ya atacada no se puede volver a atacar."
     tablero recibirDisparoEn: (self c: 'H8').
     self should: [tablero recibirDisparoEn: (self c: 'H8')] raise: BNOperacionInvalida
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testNoSePuedeMoverFueraDelTablero [
+    "Desde la fila 1 no se puede subir; la nave queda donde estaba."
+    | nave |
+    nave := BNDestructor new.
+    tablero ubicar: nave desde: (self c: 'A1') hacia: BNCoordenada horizontal.
+    self should: [tablero mover: nave hacia: BNCoordenada arriba] raise: BNOperacionInvalida.
+    self assert: (tablero casillaEn: (self c: 'A1')) ocupante equals: nave
 ]
 
 { #category : 'tests' }
@@ -236,6 +281,16 @@ BNTableroTest >> testUnaNaveAdmiteSusPropiasCasillasParaMoverse [
     nave := Object new.
     tablero ubicar: nave en: { self c: 'A1'. self c: 'B1' }.
     self assert: (tablero puedeUbicar: nave en: { self c: 'B1'. self c: 'C1' })
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testUnaNaveHeridaNoSeMueve [
+    "Regla del juego: una nave herida queda inmovil."
+    | nave |
+    nave := BNDestructor new.
+    tablero ubicar: nave desde: (self c: 'A1') hacia: BNCoordenada horizontal.
+    nave recibirImpacto.
+    self should: [tablero mover: nave hacia: BNCoordenada abajo] raise: BNOperacionInvalida
 ]
 
 { #category : 'tests' }

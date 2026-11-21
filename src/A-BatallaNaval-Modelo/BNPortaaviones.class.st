@@ -9,6 +9,12 @@ Class {
 }
 
 { #category : 'datos del tipo' }
+BNPortaaviones >> arma [
+    "El arma con la que dispara este tipo de nave."
+    ^BNBombardeo new
+]
+
+{ #category : 'datos del tipo' }
 BNPortaaviones >> nombre [
     "Nombre para mostrar en los mensajes del juego."
     ^'Portaaviones'

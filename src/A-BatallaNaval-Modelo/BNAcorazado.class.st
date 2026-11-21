@@ -9,6 +9,12 @@ Class {
 }
 
 { #category : 'datos del tipo' }
+BNAcorazado >> arma [
+    "El arma con la que dispara este tipo de nave."
+    ^BNCanon new
+]
+
+{ #category : 'datos del tipo' }
 BNAcorazado >> nombre [
     "Nombre para mostrar en los mensajes del juego."
     ^'Acorazado'

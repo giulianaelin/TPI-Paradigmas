@@ -64,6 +64,13 @@ BNTablero >> coordenadasConMina [
         collect: [:unaCasilla | unaCasilla coordenada]
 ]
 
+{ #category : 'disparos' }
+BNTablero >> coordenadasSinAtacar [
+    "Coordenadas a las que todavia no se disparo (las usa la computadora para elegir objetivos)."
+    ^(casillas reject: [:unaCasilla | unaCasilla fueAtacada])
+        collect: [:unaCasilla | unaCasilla coordenada]
+]
+
 { #category : 'configuracion' }
 BNTablero >> dimension [
     "La dimension la define BNCoordenada, asi hay un solo lugar donde cambiarla."
@@ -83,6 +90,24 @@ BNTablero >> initialize [
 BNTablero >> islas [
     "Devuelve las islas; cada una es la lista de coordenadas que ocupa."
     ^islas copy
+]
+
+{ #category : 'naves' }
+BNTablero >> mover: unaNave hacia: unDesplazamiento [
+    "Mueve la nave entera una casilla (BNCoordenada arriba, abajo, izquierda o derecha). Una nave herida no se mueve. Si cae sobre una mina, explota (lo resuelve ubicar:en:)."
+    | actuales destino |
+    unaNave puedeMoverse ifFalse: [
+        ^BNOperacionInvalida signal: 'Una nave herida no se puede mover'].
+    actuales := (self casillasDe: unaNave) collect: [:unaCasilla | unaCasilla coordenada].
+    actuales isEmpty ifTrue: [
+        ^BNOperacionInvalida signal: 'La nave no esta en el tablero'].
+    (actuales allSatisfy: [:unaCoordenada | unaCoordenada puedeDesplazarseEn: unDesplazamiento])
+        ifFalse: [^BNOperacionInvalida signal: 'La nave se saldria del tablero'].
+    destino := actuales collect: [:unaCoordenada | unaCoordenada desplazadaEn: unDesplazamiento].
+    (self puedeUbicar: unaNave en: destino) ifFalse: [
+        ^BNOperacionInvalida signal: 'No se puede mover la nave ahi (isla, otra nave o casilla atacada)'].
+    self retirar: unaNave.
+    self ubicar: unaNave en: destino
 ]
 
 { #category : 'as yet unclassified' }
@@ -110,7 +135,7 @@ BNTablero >> puedeUbicar: unOcupante en: unasCoordenadas [
 
 { #category : 'as yet unclassified' }
 BNTablero >> recibirDisparoEn: unaCoordenada [
-    "Resuelve un disparo enemigo en esa casilla y devuelve el resultado: #agua, #isla, #mina, #impacto o #hundido. Si hay una mina, el daño lo recibe la nave que disparo: de eso se encarga la partida."
+    "Resuelve un disparo enemigo en esa casilla y devuelve el resultado: #agua, #isla, #mina, #impacto, #hundido o #restos (una nave que ya se hundio por minas). Si hay una mina, el daño lo recibe la nave que disparo: de eso se encarga la partida."
     | casilla |
     casilla := self casillaEn: unaCoordenada.
     casilla fueAtacada ifTrue: [
@@ -121,6 +146,7 @@ BNTablero >> recibirDisparoEn: unaCoordenada [
         casilla detonarMina.
         ^#mina].
     casilla estaOcupada ifFalse: [^#agua].
+    casilla ocupante estaHundida ifTrue: [^#restos].
     casilla ocupante recibirImpacto.
     ^casilla ocupante estaHundida
         ifTrue: [#hundido]
