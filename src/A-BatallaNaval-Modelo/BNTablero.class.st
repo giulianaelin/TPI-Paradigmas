@@ -94,6 +94,13 @@ BNTablero >> puedeAgregarIslaEn: unasCoordenadas [
 ]
 
 { #category : 'as yet unclassified' }
+BNTablero >> puedeUbicar: unaNave desde: unaCoordenada hacia: unaDireccion [
+    "Verdadero si la nave entra en el tablero desde esa coordenada en esa direccion, y todas sus casillas la admiten."
+    ^(unaCoordenada cabeLineaDe: unaNave tamano hacia: unaDireccion) and: [
+        self puedeUbicar: unaNave en: (unaCoordenada lineaDe: unaNave tamano hacia: unaDireccion)]
+]
+
+{ #category : 'as yet unclassified' }
 BNTablero >> puedeUbicar: unOcupante en: unasCoordenadas [
     "Verdadero si todas las casillas admiten a esa nave. Sirve al ubicar y al mover."
     ^unasCoordenadas notEmpty and: [
@@ -113,6 +120,14 @@ BNTablero >> tocaOtraIsla: unasCoordenadas [
     ^unasCoordenadas anySatisfy: [:unaCoordenada |
         unaCoordenada vecinosConDiagonales anySatisfy: [:unVecino |
             (self casillaEn: unVecino) esIsla]]
+]
+
+{ #category : 'as yet unclassified' }
+BNTablero >> ubicar: unaNave desde: unaCoordenada hacia: unaDireccion [
+    "Ubica la nave ocupando tantas casillas como su tamaño, desde esa coordenada hacia la direccion (BNCoordenada horizontal o vertical)."
+    (self puedeUbicar: unaNave desde: unaCoordenada hacia: unaDireccion) ifFalse: [
+        ^BNOperacionInvalida signal: 'No se puede ubicar la nave desde ', unaCoordenada etiqueta].
+    self ubicar: unaNave en: (unaCoordenada lineaDe: unaNave tamano hacia: unaDireccion)
 ]
 
 { #category : 'as yet unclassified' }

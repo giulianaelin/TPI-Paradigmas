@@ -1,3 +1,6 @@
+"
+Ubica al azar en un tablero las islas y las minas que pide una BNConfiguracionTerreno. Solo elije los lugares: el tablero decide si una ubicación es válida. Todo el azar pasa por elegirUnaDe:, así en los tests se puede usar un Random con semilla fija y el resultado es siempre el mismo.
+"
 Class {
 	#name : 'BNGeneradorTerreno',
 	#superclass : 'Object',

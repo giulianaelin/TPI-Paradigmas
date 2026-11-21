@@ -106,6 +106,14 @@ BNTableroTest >> testNoSePuedenSuperponerDosNaves [
 ]
 
 { #category : 'tests' }
+BNTableroTest >> testNoSeUbicaUnaNaveQuePasaPorUnaIsla [
+    "Hay una isla en D2: un acorazado desde B2 hacia la derecha pasaria por ella."
+    tablero agregarIslaEn: { self c: 'D2' }.
+    self deny: (tablero puedeUbicar: BNAcorazado new desde: (self c: 'B2') hacia: BNCoordenada horizontal).
+    self assert: (tablero puedeUbicar: BNAcorazado new desde: (self c: 'B3') hacia: BNCoordenada horizontal)
+]
+
+{ #category : 'tests' }
 BNTableroTest >> testPuedeAgregarIslaEn [
     "F6-G6 esta lejos de B2; C3 la toca en diagonal; una isla vacia no vale."
     tablero agregarIslaEn: { self c: 'B2' }.
@@ -153,10 +161,44 @@ BNTableroTest >> testUbicacionInvalidaNoOcupaNingunaCasilla [
 ]
 
 { #category : 'tests' }
+BNTableroTest >> testUbicarNaveHorizontal [
+    "Un acorazado (4 casillas) desde B2 hacia la derecha ocupa B2, C2, D2 y E2."
+    | nave |
+    nave := BNAcorazado new.
+    tablero ubicar: nave desde: (self c: 'B2') hacia: BNCoordenada horizontal.
+    self
+        assert: ((tablero casillasDe: nave) collect: [:unaCasilla | unaCasilla coordenada])
+        equals: { self c: 'B2'. self c: 'C2'. self c: 'D2'. self c: 'E2' }
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testUbicarNaveVertical [
+    "Un destructor (2 casillas) desde A11 hacia abajo ocupa A11 y A12, la ultima fila."
+    | nave |
+    nave := BNDestructor new.
+    tablero ubicar: nave desde: (self c: 'A11') hacia: BNCoordenada vertical.
+    self
+        assert: ((tablero casillasDe: nave) collect: [:unaCasilla | unaCasilla coordenada])
+        equals: { self c: 'A11'. self c: 'A12' }
+]
+
+{ #category : 'tests' }
 BNTableroTest >> testUnaNaveAdmiteSusPropiasCasillasParaMoverse [
     "Moverse a la derecha: B1 ya es de la misma nave, asi que se admite."
     | nave |
     nave := Object new.
     tablero ubicar: nave en: { self c: 'A1'. self c: 'B1' }.
     self assert: (tablero puedeUbicar: nave en: { self c: 'B1'. self c: 'C1' })
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testUnaNaveQueNoEntraEnElTableroDaError [
+    "Un portaaviones (5 casillas) desde J1 hacia la derecha se saldria del tablero."
+    | nave |
+    nave := BNPortaaviones new.
+    self deny: (tablero puedeUbicar: nave desde: (self c: 'J1') hacia: BNCoordenada horizontal).
+    self
+        should: [tablero ubicar: nave desde: (self c: 'J1') hacia: BNCoordenada horizontal]
+        raise: BNOperacionInvalida.
+    self assert: (tablero casillasDe: nave) isEmpty
 ]
