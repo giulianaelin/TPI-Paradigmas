@@ -19,6 +19,14 @@ BNCasilla class >> en: unaCoordenada [
 ]
 
 { #category : 'as yet unclassified' }
+BNCasilla >> admiteA: unOcupante [
+    "Una nave puede estar aca si es agua, el enemigo no la ataco y no hay otra nave. Puede tener mina. Si ya la ocupa esa misma nave, tambien la admite: eso permite moverla."
+    ^self esAgua and: [
+        self fueAtacada not and: [
+            ocupante isNil or: [ocupante == unOcupante]]]
+]
+
+{ #category : 'as yet unclassified' }
 BNCasilla >> armarMina [
 
     (self esIsla or: [self estaOcupada])
@@ -73,6 +81,12 @@ BNCasilla >> esAgua [
 { #category : 'as yet unclassified' }
 BNCasilla >> esIsla [
     ^terreno == #isla
+]
+
+{ #category : 'as yet unclassified' }
+BNCasilla >> estaLibre [
+    "Agua, sin mina y sin nave: es donde se puede poner una isla o una mina."
+    ^self esAgua and: [estadoMina == #sinMina and: [self estaOcupada not]]
 ]
 
 { #category : 'as yet unclassified' }
