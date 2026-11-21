@@ -109,6 +109,25 @@ BNTablero >> puedeUbicar: unOcupante en: unasCoordenadas [
 ]
 
 { #category : 'as yet unclassified' }
+BNTablero >> recibirDisparoEn: unaCoordenada [
+    "Resuelve un disparo enemigo en esa casilla y devuelve el resultado: #agua, #isla, #mina, #impacto o #hundido. Si hay una mina, el daño lo recibe la nave que disparo: de eso se encarga la partida."
+    | casilla |
+    casilla := self casillaEn: unaCoordenada.
+    casilla fueAtacada ifTrue: [
+        ^BNOperacionInvalida signal: 'Ya se disparo en ', unaCoordenada etiqueta].
+    casilla marcarAtacada.
+    casilla esIsla ifTrue: [^#isla].
+    casilla tieneMinaActiva ifTrue: [
+        casilla detonarMina.
+        ^#mina].
+    casilla estaOcupada ifFalse: [^#agua].
+    casilla ocupante recibirImpacto.
+    ^casilla ocupante estaHundida
+        ifTrue: [#hundido]
+        ifFalse: [#impacto]
+]
+
+{ #category : 'as yet unclassified' }
 BNTablero >> retirar: unOcupante [
     "Libera las casillas que ocupa esa nave (por ejemplo, antes de moverla)."
     (self casillasDe: unOcupante) do: [:unaCasilla | unaCasilla liberar]
@@ -132,8 +151,12 @@ BNTablero >> ubicar: unaNave desde: unaCoordenada hacia: unaDireccion [
 
 { #category : 'as yet unclassified' }
 BNTablero >> ubicar: unOcupante en: unasCoordenadas [
-    "Ubica la nave en esas casillas, o no ubica nada si alguna no la admite."
+    "Ubica la nave en esas casillas, o no ubica nada si alguna no la admite. Si cae sobre una mina, la mina explota: la nave pierde 1 de resistencia y la casilla queda marcada como atacada."
     (self puedeUbicar: unOcupante en: unasCoordenadas) ifFalse: [
         ^BNOperacionInvalida signal: 'No se puede ubicar la nave en esas casillas'].
-    (self casillasEn: unasCoordenadas) do: [:unaCasilla | unaCasilla ocuparCon: unOcupante]
+    (self casillasEn: unasCoordenadas) do: [:unaCasilla |
+        unaCasilla ocuparCon: unOcupante.
+        unaCasilla tieneMinaActiva ifTrue: [
+            unaCasilla detonarMina; marcarAtacada.
+            unOcupante recibirImpacto]]
 ]

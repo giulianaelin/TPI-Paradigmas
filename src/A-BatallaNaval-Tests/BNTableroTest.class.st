@@ -59,6 +59,41 @@ BNTableroTest >> testCoordenadasConMina [
 ]
 
 { #category : 'tests' }
+BNTableroTest >> testDispararAUnaIsla [
+    "La isla bloquea el disparo."
+    tablero agregarIslaEn: { self c: 'D4' }.
+    self assert: (tablero recibirDisparoEn: (self c: 'D4')) equals: #isla
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testDispararAUnaMina [
+    "La mina explota y se devuelve #mina (el daño lo recibe la nave que disparo)."
+    tablero armarMinaEn: (self c: 'E5').
+    self assert: (tablero recibirDisparoEn: (self c: 'E5')) equals: #mina.
+    self assert: (tablero casillaEn: (self c: 'E5')) minaDetonada.
+    self assert: tablero coordenadasConMina isEmpty
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testDispararAUnaNaveHastaHundirla [
+    "Un destructor resiste 2 impactos: el primero es #impacto y el segundo #hundido."
+    | nave |
+    nave := BNDestructor new.
+    tablero ubicar: nave en: { self c: 'A1'. self c: 'B1' }.
+    self assert: (tablero recibirDisparoEn: (self c: 'A1')) equals: #impacto.
+    self assert: nave resistenciaRestante equals: 1.
+    self assert: (tablero recibirDisparoEn: (self c: 'B1')) equals: #hundido.
+    self assert: nave estaHundida
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testDispararAlAgua [
+    "Un disparo a una casilla vacia devuelve #agua y la deja marcada como atacada."
+    self assert: (tablero recibirDisparoEn: (self c: 'H8')) equals: #agua.
+    self assert: (tablero casillaEn: (self c: 'H8')) fueAtacada
+]
+
+{ #category : 'tests' }
 BNTableroTest >> testIslaInvalidaNoDejaElTableroAMedias [
     "F6 estaria bien, pero B3 toca otra isla: no se pone ninguna de las dos."
     tablero agregarIslaEn: { self c: 'B2' }.
@@ -82,6 +117,13 @@ BNTableroTest >> testNoSePuedeArmarUnaMinaEnUnaIsla [
     "Una isla no admite minas."
     tablero agregarIslaEn: { self c: 'D4' }.
     self should: [tablero armarMinaEn: (self c: 'D4')] raise: BNOperacionInvalida
+]
+
+{ #category : 'tests' }
+BNTableroTest >> testNoSePuedeDispararDosVecesEnLaMismaCasilla [
+    "Una casilla ya atacada no se puede volver a atacar."
+    tablero recibirDisparoEn: (self c: 'H8').
+    self should: [tablero recibirDisparoEn: (self c: 'H8')] raise: BNOperacionInvalida
 ]
 
 { #category : 'tests' }
@@ -135,12 +177,17 @@ BNTableroTest >> testRetirarLiberaLasCasillasDeLaNave [
 
 { #category : 'tests' }
 BNTableroTest >> testSePuedeUbicarUnaNaveSobreUnaMina [
-    "Segun nuestras reglas una nave puede caer sobre una mina (despues recibe el daño)."
-    | nave |
-    nave := Object new.
+    "Una nave puede caer sobre una mina: la mina explota, la nave pierde 1 de resistencia y la casilla queda marcada como atacada."
+    | nave casilla |
+    nave := BNDestructor new.
     tablero armarMinaEn: (self c: 'A1').
     tablero ubicar: nave en: { self c: 'A1'. self c: 'B1' }.
-    self assert: (tablero casillaEn: (self c: 'A1')) ocupante equals: nave
+    casilla := tablero casillaEn: (self c: 'A1').
+    self assert: casilla ocupante equals: nave.
+    self assert: casilla minaDetonada.
+    self assert: casilla fueAtacada.
+    self assert: nave resistenciaRestante equals: 1.
+    self deny: nave puedeMoverse
 ]
 
 { #category : 'tests' }
