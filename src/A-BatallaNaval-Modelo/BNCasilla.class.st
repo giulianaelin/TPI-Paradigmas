@@ -1,3 +1,6 @@
+"
+Represento una casilla del tablero: su coordenada, su terreno (agua o isla), su mina (sin mina, armada o detonada), si ya fue atacada y que nave la ocupa. Controlo mis propias reglas: no se pone una mina sobre una isla o una nave, una isla solo va en una casilla libre, y una nave solo entra si soy agua, no fui atacada y no hay otra nave (puede caer sobre una mina).
+"
 Class {
 	#name : 'BNCasilla',
 	#superclass : 'Object',

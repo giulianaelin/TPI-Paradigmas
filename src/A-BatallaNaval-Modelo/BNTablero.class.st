@@ -6,7 +6,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'casillas',
-		'islas'
+		'islas',
+		'minasDescubiertas'
 	],
 	#category : 'A-BatallaNaval-Modelo',
 	#package : 'A-BatallaNaval-Modelo'
@@ -71,6 +72,12 @@ BNTablero >> coordenadasSinAtacar [
         collect: [:unaCasilla | unaCasilla coordenada]
 ]
 
+{ #category : 'minas' }
+BNTablero >> descubrirMinaEn: unaCoordenada [
+    "El enemigo ya sabe que en esa casilla hay una mina."
+    self minasDescubiertas add: unaCoordenada
+]
+
 { #category : 'configuracion' }
 BNTablero >> dimension [
     "La dimension la define BNCoordenada, asi hay un solo lugar donde cambiarla."
@@ -83,13 +90,20 @@ BNTablero >> initialize [
     super initialize.
     casillas := (BNCoordenada todas collect: [:unaCoordenada |
         BNCasilla en: unaCoordenada]) asArray.
-    islas := OrderedCollection new
+    islas := OrderedCollection new.
+    minasDescubiertas := Set new
 ]
 
 { #category : 'accessing' }
 BNTablero >> islas [
     "Devuelve las islas; cada una es la lista de coordenadas que ocupa."
     ^islas copy
+]
+
+{ #category : 'minas' }
+BNTablero >> minasDescubiertas [
+    "Coordenadas de las minas que el enemigo descubrio con el sonar."
+    ^minasDescubiertas ifNil: [minasDescubiertas := Set new]
 ]
 
 { #category : 'naves' }
@@ -159,6 +173,12 @@ BNTablero >> retirar: unOcupante [
     (self casillasDe: unOcupante) do: [:unaCasilla | unaCasilla liberar]
 ]
 
+{ #category : 'minas' }
+BNTablero >> tieneMinaDescubiertaEn: unaCoordenada [
+    "Verdadero si en esa casilla hay una mina armada que el enemigo ya descubrio."
+    ^(self minasDescubiertas includes: unaCoordenada) and: [(self casillaEn: unaCoordenada) tieneMinaActiva]
+]
+
 { #category : 'as yet unclassified' }
 BNTablero >> tocaOtraIsla: unasCoordenadas [
     "Verdadero si alguna coordenada es vecina, incluso en diagonal, de una isla ya ubicada."
@@ -184,5 +204,5 @@ BNTablero >> ubicar: unOcupante en: unasCoordenadas [
         unaCasilla ocuparCon: unOcupante.
         unaCasilla tieneMinaActiva ifTrue: [
             unaCasilla detonarMina; marcarAtacada.
-            unOcupante recibirImpacto]]
+            unOcupante recibirDanioDeMina]]
 ]

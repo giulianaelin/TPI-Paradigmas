@@ -1,3 +1,6 @@
+"
+Guardo como es el terreno de un tablero: los tamanos de las islas y la cantidad de minas (la estandar: islas de 1, 1 y 2 casillas y 4 minas). Valido que la configuracion tenga sentido y me puedo pasar a un estado simple y reconstruir desde el. BNGeneradorTerreno me usa para saber que colocar.
+"
 Class {
 	#name : 'BNConfiguracionTerreno',
 	#superclass : 'Object',

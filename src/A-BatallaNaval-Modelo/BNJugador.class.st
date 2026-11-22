@@ -56,7 +56,7 @@ BNJugador >> nombre [
 BNJugador >> setNombre: unNombre [
     nombre := unNombre.
     tablero := BNTablero new.
-    flota := BNFlota estandar
+    flota := BNFlota conBarreminas
 ]
 
 { #category : 'accessing' }

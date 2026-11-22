@@ -21,6 +21,12 @@ BNAtaqueRapido >> tirosDesde: unosObjetivos hacia: unaDireccion [
         collect: [:unaCoordenada | { unaCoordenada }]
 ]
 
+{ #category : 'recarga' }
+BNAtaqueRapido >> turnosDeRecarga [
+    "Sirve para que no encadene dos ataques rapidos en el mismo turno (con el disparo extra)."
+    ^1
+]
+
 { #category : 'datos' }
 BNAtaqueRapido >> usaDireccion [
     ^true

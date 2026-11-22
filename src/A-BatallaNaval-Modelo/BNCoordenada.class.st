@@ -1,3 +1,6 @@
+"
+Represento una posicion del tablero: una fila y una columna (por ejemplo C8 = columna C, fila 8). La dimension del tablero la defino yo (class >> dimension), asi hay un solo lugar donde cambiarla. Se crearme desde un texto ('C8') validando que este dentro del tablero, mostrarme como etiqueta, y calcular vecinas (ortogonales y con diagonales), lineas de casillas en una direccion (para ubicar naves y para el torpedo) y desplazamientos (para mover naves y desviar disparos). Dos coordenadas con la misma fila y columna son iguales.
+"
 Class {
 	#name : 'BNCoordenada',
 	#superclass : 'Object',

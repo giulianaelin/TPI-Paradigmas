@@ -26,6 +26,12 @@ BNArma >> tirosDesde: unosObjetivos hacia: unaDireccion [
     ^self subclassResponsibility
 ]
 
+{ #category : 'recarga' }
+BNArma >> turnosDeRecarga [
+    "Cuantos turnos de su duenio tiene que esperar la nave para volver a usar esta arma. Las armas comunes no recargan."
+    ^0
+]
+
 { #category : 'datos' }
 BNArma >> usaDireccion [
     "Verdadero si el arma necesita una direccion (horizontal o vertical)."

@@ -20,6 +20,12 @@ BNTorpedo >> tirosDesde: unosObjetivos hacia: unaDireccion [
     ^{ unosObjetivos first lineaRecortadaDe: 3 hacia: unaDireccion }
 ]
 
+{ #category : 'recarga' }
+BNTorpedo >> turnosDeRecarga [
+    "El torpedo pega en 3 casillas: hay que esperar para volver a usarlo."
+    ^2
+]
+
 { #category : 'datos' }
 BNTorpedo >> usaDireccion [
     ^true

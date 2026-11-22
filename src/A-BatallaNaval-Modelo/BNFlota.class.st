@@ -1,3 +1,6 @@
+"
+Represento el conjunto de naves de un jugador. La flota estandar es la de la consigna (2 naves de cada uno de los 5 tipos); la del juego suma un barreminas (conBarreminas). Respondo cuantas casillas necesito, que naves siguen a flote y si estoy destruida (todas hundidas), que es la condicion de derrota.
+"
 Class {
 	#name : 'BNFlota',
 	#superclass : 'Object',
@@ -7,6 +10,12 @@ Class {
 	#category : 'A-BatallaNaval-Modelo',
 	#package : 'A-BatallaNaval-Modelo'
 }
+
+{ #category : 'instance creation' }
+BNFlota class >> conBarreminas [
+    "La flota del juego: la estandar de la consigna mas un barreminas (caracteristica propia)."
+    ^self conNaves: self estandar naves , { BNBarreminas new }
+]
 
 { #category : 'as yet unclassified' }
 BNFlota class >> conNaves: unasNaves [

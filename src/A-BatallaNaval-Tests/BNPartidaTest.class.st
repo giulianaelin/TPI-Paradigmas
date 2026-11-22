@@ -19,13 +19,15 @@ BNPartidaTest >> jugarHastaElFinal [
     vueltas := 0.
     [partida estaTerminada or: [vueltas > 2000]] whileFalse: [
         | nave |
+        partida jugarTurnosDeLaComputadora.
         nave := partida jugador navesAFlote
-            detect: [:unaNave | unaNave arma cantidadDeObjetivos = 1]
+            detect: [:unaNave | unaNave armaDisponible cantidadDeObjetivos = 1]
             ifNone: [partida jugador navesAFlote first].
         partida
             disparar: nave
-            a: (estrategia elegirObjetivos: nave arma cantidadDeObjetivos en: partida computadora tablero con: partida)
+            a: (estrategia elegirObjetivos: nave armaDisponible cantidadDeObjetivos en: partida computadora tablero con: partida)
             hacia: BNCoordenada horizontal.
+        partida jugarTurnosDeLaComputadora.
         vueltas := vueltas + 1]
 ]
 
@@ -41,19 +43,39 @@ BNPartidaTest >> testAlEmpezarSeUbicanLasNaves [
     "La partida arranca en ubicacion, con la flota de la computadora ya ubicada y la del jugador sin ubicar."
     self assert: partida fase equals: #ubicacion.
     self assert: partida computadora navesSinUbicar isEmpty.
-    self assert: partida jugador navesSinUbicar size equals: 10
+    self assert: partida jugador navesSinUbicar size equals: 11
 ]
 
 { #category : 'tests' }
-BNPartidaTest >> testDespuesDeDispararVuelveATocarleAlJugador [
-    "La computadora juega sola: cuando termina el metodo, le toca de nuevo al jugador (o termino la partida)."
+BNPartidaTest >> testConLaEstrategiaCazadoraTambienTermina [
+    "La dificultad intermedia es otra estrategia: la partida se juega igual hasta que alguien gana."
+    partida usarEstrategia: BNEstrategiaCazadora new.
+    partida ubicarFlotaDelJugadorAlAzar.
+    self jugarHastaElFinal.
+    self assert: partida estrategia class equals: BNEstrategiaCazadora.
+    self assert: partida estaTerminada
+]
+
+{ #category : 'tests' }
+BNPartidaTest >> testDespuesDelTurnoDeLaComputadoraVuelveATocarleAlJugador [
+    "Disparar no hace jugar a la computadora: juega cuando se lo piden, hasta que falla y le vuelve a tocar al jugador."
     | nave objetivo |
     partida ubicarFlotaDelJugadorAlAzar.
     nave := partida jugador naves detect: [:unaNave | unaNave class == BNAcorazado].
     objetivo := partida computadora tablero coordenadasSinAtacar first.
     partida disparar: nave a: { objetivo } hacia: BNCoordenada horizontal.
+    self deny: (partida registro anySatisfy: [:unaLinea | unaLinea beginsWith: 'Computadora:']).
+    [partida leTocaALaComputadora] whileTrue: [partida jugarTurnoDeLaComputadora].
     self assert: (partida estaTerminada or: [partida turno == partida jugador]).
     self assert: partida registro notEmpty
+]
+
+{ #category : 'tests' }
+BNPartidaTest >> testLaComputadoraNoJuegaEnElTurnoDelJugador [
+    "Al empezar la batalla le toca al jugador: la computadora no puede disparar."
+    partida ubicarFlotaDelJugadorAlAzar.
+    self deny: partida leTocaALaComputadora.
+    self should: [partida jugarTurnoDeLaComputadora] raise: BNOperacionInvalida
 ]
 
 { #category : 'tests' }
@@ -61,6 +83,24 @@ BNPartidaTest >> testLosDosTablerosTienenTerreno [
     "Cada tablero tiene sus 3 islas."
     self assert: partida jugador tablero islas size equals: 3.
     self assert: partida computadora tablero islas size equals: 3
+]
+
+{ #category : 'tests' }
+BNPartidaTest >> testMoverPasaElTurnoALaComputadora [
+    "Mover una nave gasta el turno: despues le toca a la computadora."
+    | nave |
+    partida ubicarFlotaDelJugadorAlAzar.
+    nave := partida jugador naves detect: [:unaNave |
+        unaNave puedeMoverse and: [
+            { BNCoordenada arriba. BNCoordenada abajo. BNCoordenada izquierda. BNCoordenada derecha } anySatisfy: [:d |
+                [partida jugador tablero puedeUbicar: unaNave en: ((partida jugador tablero casillasDe: unaNave) collect: [:c | c coordenada desplazadaEn: d])]
+                    on: BNError do: [:e | false]]]].
+    partida
+        mover: nave
+        hacia: ({ BNCoordenada arriba. BNCoordenada abajo. BNCoordenada izquierda. BNCoordenada derecha } detect: [:d |
+            [partida jugador tablero puedeUbicar: nave en: ((partida jugador tablero casillasDe: nave) collect: [:c | c coordenada desplazadaEn: d])]
+                on: BNError do: [:e | false]]).
+    self assert: (partida estaTerminada or: [partida leTocaALaComputadora])
 ]
 
 { #category : 'tests' }

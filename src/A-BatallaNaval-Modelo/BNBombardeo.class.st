@@ -26,3 +26,9 @@ BNBombardeo >> tirosDesde: unosObjetivos hacia: unaDireccion [
         ^BNOperacionInvalida signal: 'El bombardeo necesita dos casillas distintas'].
     ^unosObjetivos collect: [:unObjetivo | { unObjetivo }]
 ]
+
+{ #category : 'recarga' }
+BNBombardeo >> turnosDeRecarga [
+    "El bombardeo pega en 2 casillas: hay que esperar para volver a usarlo."
+    ^2
+]
