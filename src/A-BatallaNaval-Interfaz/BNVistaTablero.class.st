@@ -8,7 +8,8 @@ Class {
 		'tablero',
 		'origen',
 		'marcadas',
-		'marcasValidas'
+		'marcasValidas',
+		'carteles'
 	],
 	#category : 'A-BatallaNaval-Interfaz',
 	#package : 'A-BatallaNaval-Interfaz'
@@ -18,6 +19,29 @@ Class {
 BNVistaTablero class >> tablero: unTablero origen: unPunto [
 
 	^self new setTablero: unTablero origen: unPunto
+]
+
+{ #category : 'cartelitos' }
+BNVistaTablero >> agregarCartel: unTexto en: unaCoordenada [
+
+	"Un textito (por ejemplo ¡Boom!) que aparece sobre la casilla, sube un poco y desaparece."
+	self carteles add: { unTexto. unaCoordenada. Time millisecondClockValue }
+]
+
+{ #category : 'cartelitos' }
+BNVistaTablero >> carteles [
+
+	^carteles ifNil: [carteles := OrderedCollection new]
+]
+
+{ #category : 'cartelitos' }
+BNVistaTablero >> coloresDeCartel: unTexto [
+
+	"Color de la letra y de su sombra segun el cartel."
+	unTexto = '¡Splash!' ifTrue: [^{ Color fromHexString: 'DFF7FF'. Color fromHexString: '0A4E72' }].
+	unTexto = '¡Ping!' ifTrue: [^{ Color fromHexString: '6CCFD6'. Color fromHexString: '0A4E72' }].
+	unTexto = '¡Hundido!' ifTrue: [^{ BNLienzoPixel corazon. Color fromHexString: '240C10' }].
+	^{ Color fromHexString: 'FFD21F'. Color fromHexString: '240C10' }
 ]
 
 { #category : 'geometria' }
@@ -75,6 +99,23 @@ BNVistaTablero >> dibujarAtaqueEn: unaCasilla canvas: unCanvas con: unosRecursos
 	unaCasilla minaDetonada ifFalse: [self pegar: 'agua-atacada' en: unaCasilla coordenada canvas: unCanvas con: unosRecursos]
 ]
 
+{ #category : 'cartelitos' }
+BNVistaTablero >> dibujarCartelesEn: unCanvas con: unosRecursos [
+
+	| ahora |
+	ahora := Time millisecondClockValue.
+	self carteles do: [:unCartel |
+		| pasado colores forma rect |
+		pasado := ahora - unCartel third.
+		pasado <= self duracionDeCartel ifTrue: [
+			colores := self coloresDeCartel: unCartel first.
+			forma := unosRecursos fuente formaDe: unCartel first escala: 3 color: colores first sombra: colores last.
+			rect := self rectanguloDe: unCartel second.
+			unCanvas
+				translucentImage: forma
+				at: (rect center x - (forma width // 2)) @ (rect top - 14 - (pasado * 26 // self duracionDeCartel))]]
+]
+
 { #category : 'dibujo' }
 BNVistaTablero >> dibujarEn: unCanvas con: unosRecursos [
 
@@ -84,7 +125,8 @@ BNVistaTablero >> dibujarEn: unCanvas con: unosRecursos [
 	self dibujarNavesEn: unCanvas con: unosRecursos.
 	tablero casillas do: [:unaCasilla | self dibujarMarcasDe: unaCasilla en: unCanvas con: unosRecursos].
 	self dibujarResaltadoEn: unCanvas.
-	unCanvas frameRectangle: (self rectangulo expandBy: 3) width: 3 color: BNLienzoPixel oscuro
+	unCanvas frameRectangle: (self rectangulo expandBy: 3) width: 3 color: BNLienzoPixel oscuro.
+	self dibujarCartelesEn: unCanvas con: unosRecursos
 ]
 
 { #category : 'dibujo' }
@@ -166,6 +208,13 @@ BNVistaTablero >> dibujarResaltadoEn: unCanvas [
 		rect := self rectanguloDe: unaCoordenada.
 		unCanvas fillRectangle: rect color: relleno.
 		unCanvas frameRectangle: rect width: 2 color: borde]
+]
+
+{ #category : 'cartelitos' }
+BNVistaTablero >> duracionDeCartel [
+
+	"Milisegundos que dura un cartelito en pantalla."
+	^1400
 ]
 
 { #category : 'geometria' }
@@ -258,4 +307,14 @@ BNVistaTablero >> setTablero: unTablero origen: unPunto [
 	origen := unPunto.
 	marcadas := #().
 	marcasValidas := true
+]
+
+{ #category : 'cartelitos' }
+BNVistaTablero >> tieneCarteles [
+
+	"Verdadero si hay cartelitos animandose (hay que redibujar seguido)."
+	| ahora |
+	ahora := Time millisecondClockValue.
+	self carteles removeAllSuchThat: [:unCartel | ahora - unCartel third > self duracionDeCartel].
+	^self carteles notEmpty
 ]

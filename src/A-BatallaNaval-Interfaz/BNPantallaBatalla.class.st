@@ -58,6 +58,7 @@ BNPantallaBatalla >> actualizarMarcasCon: unPunto tiempo: unosMilisegundos [
 			(vistaEnemiga marcar: celdas validas: (modoSonar == true or: [self sonValidas: celdas])) ifTrue: [cambio := true]]
 		ifFalse: [(vistaEnemiga marcar: pendientes asArray validas: true) ifTrue: [cambio := true]].
 	(vistaPropia marcar: self coordenadasDeLaElegida validas: true) ifTrue: [cambio := true].
+	(vistaEnemiga tieneCarteles or: [vistaPropia tieneCarteles]) ifTrue: [cambio := true].
 	^cambio
 ]
 
@@ -102,6 +103,19 @@ BNPantallaBatalla >> ayudaDe: unaNave [
 	unaNave puedeMoverse ifFalse: [texto := texto , ' Está herida: ya no se mueve.'].
 	unaNave estaOculta ifTrue: [texto := texto , ' Está sumergido: el enemigo no ve sus impactos. Si dispara, se le van a ver.'].
 	^texto
+]
+
+{ #category : 'avisos' }
+BNPantallaBatalla >> cartelPara: unaLinea [
+
+	"El cartelito que corresponde a una linea de resultado del registro, o nil."
+	(unaLinea includesSubstring: '¡Hundido!') ifTrue: [^'¡Hundido!'].
+	(unaLinea includesSubstring: '¡Impacto!') ifTrue: [^'¡Boom!'].
+	(unaLinea includesSubstring: '¡Mina!') ifTrue: [^'¡Kaboom!'].
+	(unaLinea includesSubstring: 'Restos') ifTrue: [^'¡Crac!'].
+	(unaLinea includesSubstring: ': Isla') ifTrue: [^'¡Tonk!'].
+	(unaLinea includesSubstring: ': Agua') ifTrue: [^'¡Splash!'].
+	^nil
 ]
 
 { #category : 'eventos' }
@@ -165,6 +179,8 @@ BNPantallaBatalla >> contarLoQuePaso [
 		ifTrue: [detalle add: '¡Acertaste! Disparás otra vez.']
 		ifFalse: [self partida leTocaALaComputadora ifTrue: [detalle add: 'Ahora le toca al enemigo...']].
 	deLaComputadora isEmpty ifFalse: [detalle add: 'El enemigo: ' , (self resumen: deLaComputadora)].
+	self ponerCartelesDe: mias en: vistaEnemiga.
+	self ponerCartelesDe: deLaComputadora en: vistaPropia.
 	nutria decir: titulo detalle: detalle asArray cara: cara
 ]
 
@@ -176,6 +192,7 @@ BNPantallaBatalla >> contarTurnoDeLaComputadora [
 	nuevas := registro allButFirst: registroVisto.
 	registroVisto := registro size.
 	teDio := (self lineas: nuevas incluyen: '¡Impacto!') or: [self lineas: nuevas incluyen: '¡Hundido!'].
+	self ponerCartelesDe: nuevas en: vistaPropia.
 	detalle := OrderedCollection with: 'El enemigo disparó. ' , (self resumen: nuevas).
 	self partida leTocaALaComputadora
 		ifTrue: [
@@ -297,6 +314,13 @@ BNPantallaBatalla >> guardar [
 		cara: #contenta
 ]
 
+{ #category : 'avisos' }
+BNPantallaBatalla >> jerarquiaDeCarteles [
+
+	"Del mas importante al menos importante: de cada disparo se muestra un solo cartelito."
+	^#('¡Hundido!' '¡Kaboom!' '¡Boom!' '¡Crac!' '¡Tonk!' '¡Splash!')
+]
+
 { #category : 'turno de la computadora' }
 BNPantallaBatalla >> jugarLaComputadora [
 
@@ -329,6 +353,25 @@ BNPantallaBatalla >> pausa [
 
 	"Milisegundos que espera la computadora antes de cada disparo, para que se pueda leer lo que paso y se note que es su turno."
 	^3500
+]
+
+{ #category : 'avisos' }
+BNPantallaBatalla >> ponerCartelesDe: unasLineas en: unaVista [
+
+	"De los resultados con coordenada (por ejemplo '  C4: Agua'), pone solo el cartelito mas importante, sobre la casilla donde paso."
+	| mejor mejorCoordenada |
+	unasLineas do: [:unaLinea |
+		| texto partes coordenada |
+		texto := self cartelPara: unaLinea.
+		partes := unaLinea trimBoth substrings: ':'.
+		(texto notNil and: [partes size > 1]) ifTrue: [
+			coordenada := [BNCoordenada desdeTexto: partes first] on: BNError do: [:error | nil].
+			(coordenada notNil and: [mejor isNil or: [
+				(self jerarquiaDeCarteles indexOf: texto) < (self jerarquiaDeCarteles indexOf: mejor)]])
+					ifTrue: [
+						mejor := texto.
+						mejorCoordenada := coordenada]]].
+	mejor ifNotNil: [unaVista agregarCartel: mejor en: mejorCoordenada]
 ]
 
 { #category : 'initialization' }
@@ -378,7 +421,9 @@ BNPantallaBatalla >> sondearEn: unaCoordenada [
 	self ejecutar: [
 		self partida sondear: unaCoordenada con: elegida.
 		salioBien := true].
-	salioBien ifTrue: [vistaEnemiga mostrarSonar: (BNSonar new zonaAlrededorDe: unaCoordenada)]
+	salioBien ifTrue: [
+		vistaEnemiga mostrarSonar: (BNSonar new zonaAlrededorDe: unaCoordenada).
+		vistaEnemiga agregarCartel: '¡Ping!' en: unaCoordenada]
 ]
 
 { #category : 'eventos' }
