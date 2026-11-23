@@ -1,5 +1,5 @@
 "
-Una casilla individual. Conoce su coordenada, su terreno (agua o isla), el estado de su mina (sinMina, armada, detonada), si fue atacada y su ocupante. Las islas no admiten minas ni ocupantes. Las reglas de juego las aplica BNTablero.
+Represento una casilla del tablero: su coordenada, su terreno (agua o isla), su mina (sin mina, armada o detonada), si ya fue atacada y que nave la ocupa. Controlo mis propias reglas: no se pone una mina sobre una isla o una nave, una isla solo va en una casilla libre, y una nave solo entra si soy agua, no fui atacada y no hay otra nave (puede caer sobre una mina).
 "
 Class {
 	#name : 'BNCasilla',
@@ -19,6 +19,14 @@ Class {
 BNCasilla class >> en: unaCoordenada [
     "Crea una casilla en la posicion indicada."
     ^self new inicializarEn: unaCoordenada
+]
+
+{ #category : 'as yet unclassified' }
+BNCasilla >> admiteA: unOcupante [
+    "Una nave puede estar aca si es agua, el enemigo no la ataco y no hay otra nave. Puede tener mina. Si ya la ocupa esa misma nave, tambien la admite: eso permite moverla."
+    ^self esAgua and: [
+        self fueAtacada not and: [
+            ocupante isNil or: [ocupante == unOcupante]]]
 ]
 
 { #category : 'as yet unclassified' }
@@ -76,6 +84,12 @@ BNCasilla >> esAgua [
 { #category : 'as yet unclassified' }
 BNCasilla >> esIsla [
     ^terreno == #isla
+]
+
+{ #category : 'as yet unclassified' }
+BNCasilla >> estaLibre [
+    "Agua, sin mina y sin nave: es donde se puede poner una isla o una mina."
+    ^self esAgua and: [estadoMina == #sinMina and: [self estaOcupada not]]
 ]
 
 { #category : 'as yet unclassified' }

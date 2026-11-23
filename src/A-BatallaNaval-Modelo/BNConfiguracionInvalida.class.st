@@ -1,5 +1,5 @@
 "
-Se lanza ante una configuracion imposible o inconsistente.
+Error de configuracion del terreno: tamanos de islas o cantidad de minas imposibles, o que no haya lugar en el tablero para colocarlas.
 "
 Class {
 	#name : 'BNConfiguracionInvalida',

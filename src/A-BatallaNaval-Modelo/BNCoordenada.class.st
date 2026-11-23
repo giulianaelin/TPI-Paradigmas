@@ -1,5 +1,5 @@
 "
-Posicion inmutable de un tablero de 12x12: fila 1..12 y columna A..L. Valida limites, se compara por valor, convierte desde texto y entrega sus vecinos.
+Represento una posicion del tablero: una fila y una columna (por ejemplo C8 = columna C, fila 8). La dimension del tablero la defino yo (class >> dimension), asi hay un solo lugar donde cambiarla. Se crearme desde un texto ('C8') validando que este dentro del tablero, mostrarme como etiqueta, y calcular vecinas (ortogonales y con diagonales), lineas de casillas en una direccion (para ubicar naves y para el torpedo) y desplazamientos (para mover naves y desviar disparos). Dos coordenadas con la misma fila y columna son iguales.
 "
 Class {
 	#name : 'BNCoordenada',
@@ -11,6 +11,24 @@ Class {
 	#category : 'A-BatallaNaval-Modelo',
 	#package : 'A-BatallaNaval-Modelo'
 }
+
+{ #category : 'direcciones' }
+BNCoordenada class >> abajo [
+    "Desplazamiento para mover una fila hacia abajo."
+    ^#(1 0)
+]
+
+{ #category : 'direcciones' }
+BNCoordenada class >> arriba [
+    "Desplazamiento para mover una fila hacia arriba: {filas. columnas}."
+    ^#(-1 0)
+]
+
+{ #category : 'direcciones' }
+BNCoordenada class >> derecha [
+    "Desplazamiento para mover una columna hacia la derecha."
+    ^#(0 1)
+]
 
 { #category : 'as yet unclassified' }
 BNCoordenada class >> desdeArray: unArray [
@@ -73,6 +91,18 @@ BNCoordenada class >> fila: unaFila columna: unaColumna [
     ^self new setFila: unaFila columna: unaColumna
 ]
 
+{ #category : 'accessing' }
+BNCoordenada class >> horizontal [
+    "Desplazamiento para avanzar una columna hacia la derecha: {filas. columnas}."
+    ^#(0 1)
+]
+
+{ #category : 'direcciones' }
+BNCoordenada class >> izquierda [
+    "Desplazamiento para mover una columna hacia la izquierda."
+    ^#(0 -1)
+]
+
 { #category : 'as yet unclassified' }
 BNCoordenada class >> letraDeColumna: unNumeroDeColumna [
     "Convierte un numero de columna en su letra"
@@ -102,6 +132,12 @@ BNCoordenada class >> todas [
     ^coordenadas
 ]
 
+{ #category : 'public' }
+BNCoordenada class >> vertical [
+    "Desplazamiento para avanzar una fila hacia abajo: {filas. columnas}."
+    ^#(1 0)
+]
+
 { #category : 'comparing' }
 BNCoordenada >> = otraCoordenada [
     "Comprueba si dos coordenadas tienen la misma fila y columna."
@@ -116,10 +152,32 @@ BNCoordenada >> asArray [
     ^{fila. columna}
 ]
 
+{ #category : 'as yet unclassified' }
+BNCoordenada >> cabeLineaDe: unaCantidad hacia: unaDireccion [
+    "Verdadero si una linea de esa cantidad de casillas, empezando aca y avanzando en esa direccion, queda dentro del tablero. Alcanza con mirar la ultima casilla."
+    ^self class
+        esValidaFila: fila + ((unaCantidad - 1) * unaDireccion first)
+        columna: columna + ((unaCantidad - 1) * unaDireccion last)
+]
+
 { #category : 'accessing' }
 BNCoordenada >> columna [
     "Devuelve el numero de columna."
     ^columna
+]
+
+{ #category : 'desplazamiento' }
+BNCoordenada >> desplazadaEn: unDesplazamiento [
+    "Devuelve la coordenada que queda al sumarle el desplazamiento. Si se sale del tablero, da error."
+    ^self class
+        fila: fila + unDesplazamiento first
+        columna: columna + unDesplazamiento last
+]
+
+{ #category : 'desplazamiento' }
+BNCoordenada >> desplazamientoHasta: otraCoordenada [
+    "Devuelve el desplazamiento {filas. columnas} que lleva de esta coordenada a la otra."
+    ^{ otraCoordenada fila - fila. otraCoordenada columna - columna }
 ]
 
 { #category : 'as yet unclassified' }
@@ -146,6 +204,29 @@ BNCoordenada >> letraDeColumna [
     ^self class letraDeColumna: columna
 ]
 
+{ #category : 'as yet unclassified' }
+BNCoordenada >> lineaDe: unaCantidad hacia: unaDireccion [
+    "Devuelve esa cantidad de coordenadas seguidas, empezando por esta. Ejemplo: B2 lineaDe: 3 hacia: horizontal da B2, C2, D2. Si se sale del tablero, da error."
+    ^(0 to: unaCantidad - 1) collect: [:paso |
+        self class
+            fila: fila + (paso * unaDireccion first)
+            columna: columna + (paso * unaDireccion last)]
+]
+
+{ #category : 'linea' }
+BNCoordenada >> lineaRecortadaDe: unaCantidad hacia: unaDireccion [
+    "Como lineaDe:hacia:, pero solo devuelve las coordenadas que caen dentro del tablero (las armas pueden apuntar cerca del borde)."
+    ^((0 to: unaCantidad - 1)
+        select: [:paso |
+            self class
+                esValidaFila: fila + (paso * unaDireccion first)
+                columna: columna + (paso * unaDireccion last)])
+        collect: [:paso |
+            self class
+                fila: fila + (paso * unaDireccion first)
+                columna: columna + (paso * unaDireccion last)]
+]
+
 { #category : 'printing' }
 BNCoordenada >> printOn: unStream [
     "Muestra una coordenada de forma clara."
@@ -153,6 +234,14 @@ BNCoordenada >> printOn: unStream [
         nextPutAll: 'BNCoordenada(';
         nextPutAll: self etiqueta;
         nextPut: $)
+]
+
+{ #category : 'desplazamiento' }
+BNCoordenada >> puedeDesplazarseEn: unDesplazamiento [
+    "Verdadero si al sumarle el desplazamiento {filas. columnas} sigue dentro del tablero."
+    ^self class
+        esValidaFila: fila + unDesplazamiento first
+        columna: columna + unDesplazamiento last
 ]
 
 { #category : 'initialization' }

@@ -1,5 +1,5 @@
 "
-Se lanza ante una coordenada inexistente o mal escrita.
+Error de coordenadas: un texto mal escrito (por ejemplo 'Z99') o una posicion fuera del tablero.
 "
 Class {
 	#name : 'BNCoordenadaInvalida',
