@@ -348,6 +348,12 @@ BNPantallaBatalla >> mover: unDesplazamiento [
 	self ejecutar: [self partida mover: elegida hacia: unDesplazamiento]
 ]
 
+{ #category : 'accessing' }
+BNPantallaBatalla >> musica [
+	"La batalla tiene su propia cancion."
+	^'batalla'
+]
+
 { #category : 'turno de la computadora' }
 BNPantallaBatalla >> pausa [
 

@@ -55,9 +55,3 @@ BNPantallaOpciones >> marcarDificultad [
 	botonFacil elegido: juego dificultad = #facil.
 	botonIntermedio elegido: juego dificultad = #intermedio
 ]
-
-{ #category : 'accessing' }
-BNPantallaOpciones >> musica [
-
-	^'menu'
-]

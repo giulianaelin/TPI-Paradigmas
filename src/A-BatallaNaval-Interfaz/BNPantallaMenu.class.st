@@ -30,9 +30,3 @@ BNPantallaMenu >> dibujarContenidoEn: unCanvas [
 	unCanvas translucentImage: (recursos imagen: 'vida-sana' ampliada: 3) at: 903 @ 672.
 	unCanvas translucentImage: (recursos imagen: 'nutria-asomada' ampliada: 2) at: 317 @ 38
 ]
-
-{ #category : 'accessing' }
-BNPantallaMenu >> musica [
-
-	^'menu'
-]

@@ -114,9 +114,8 @@ BNPantalla >> escribirParrafos: unosTextos en: unPunto ancho: unAncho en: unCanv
 
 { #category : 'accessing' }
 BNPantalla >> musica [
-
-	"Nombre de la cancion que suena en esta pantalla (nil = silencio)."
-	^nil
+	"Nombre de la cancion que suena en esta pantalla (nil = silencio). Por defecto suena la del menu; una pantalla puede redefinirlo para tener su propia cancion."
+	^'menu'
 ]
 
 { #category : 'accessing' }
